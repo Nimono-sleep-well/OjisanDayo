@@ -1,8 +1,13 @@
 import discord
 from discord import app_commands
 
-import config
 import json
+import random
+
+import config
+from function import (
+    splitText
+)
 
 TOKEN = config.BOT_TOKEN
 
@@ -18,13 +23,17 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+
     if message.author.bot:
         return
-    msg = message.content
     
-    if message.content == "しずかに":
-        await message.channel.send("ごめんなさい")
-    else:
-        await message.channel.send(msg)
+    #if message.content == "しずかに":
+    #    await message.channel.send("ごめんなさい")
+    #else:
+    #    await message.channel.send(msg)
+    
+    msg = splitText.splitText(message.content)
+
+    await message.channel.send(msg)
 
 client.run(TOKEN)
