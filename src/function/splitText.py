@@ -2,14 +2,13 @@ import random
 
 reactionState: bool
 
-knownWords: str = ["python", "寿司", "テニス", "アサシン"]
+knownWords: str = ["python", "寿司", "テニス", "アサシン", "おぢさん"]
 words: str = []
 
 def splitText(msg):
     reactionState = False
 
     words = msg.split()
-    #MeCabで文章を分割，配列に入れる
 
     for i in knownWords:
         if i in words:
