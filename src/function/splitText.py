@@ -17,4 +17,4 @@ def split_text(msg):
     for i in words:
         splitted_text.append(i.split()[0])
 
-    return words
+    return splitted_text
