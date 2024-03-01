@@ -1,7 +1,6 @@
 import MeCab
 import emoji
 import re
-import MeCab
 import random
 import json
 from nltk import ngrams
@@ -19,6 +18,7 @@ def clean_text(lines):
         text = re.sub(r"HOURS", str(random.randrange(12)+1), text)
         text = re.sub(r"MINUTES", str(random.randrange(60)), text)
         text = text.replace(" ", "")
+        text = text.replace("　", "")
         text = emoji.replace_emoji(text)
         cleaned_lines.append(text)
     
@@ -31,6 +31,38 @@ def split_text(input):
 		data = MeCab.Tagger('-Owakati').parse(line).strip()
 		datas.append(data)
 	return datas
+
+def make_emoji_list(input):
+    include_emoji = split_text(input)
+    
+    words = []
+    for line in include_emoji:
+        words.append(line.split())
+    words = sum(words, [])
+    try:
+        words.remove(' ')
+    except ValueError:
+        pass
+
+    datas = []
+    last_word = ""
+    emoji_group = ""
+    for word in words:
+        if emoji.emoji_count(word) > 0:
+            emoji_group += word
+        else:
+            if emoji.emoji_count(emoji_group) > 0:
+                datas.append([last_word,emoji_group])
+            last_word = word
+            emoji_group = ""
+
+    emoji_dic = {}
+    for data in datas:
+        if data[0] not in emoji_dic:
+            emoji_dic[data[0]] = []
+        emoji_dic[data[0]].append(data[1])
+
+    return emoji_dic
 
 # モデルの生成
 def make_model(datas):
@@ -86,9 +118,6 @@ def make_sentence(model, topic, topic_list):
 
     return ''.join(sentence)
 
-# 以下使い方
-
-
 def markov(word):
     with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
         input = line.readlines()
@@ -100,3 +129,6 @@ def markov(word):
     known_words = []
 
     return make_sentence(model, word, known_words)
+
+with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
+    input = line.readlines()
