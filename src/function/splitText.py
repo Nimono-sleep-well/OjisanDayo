@@ -1,11 +1,12 @@
 import random
+import MeCab
 
 reactionState: bool
 
 knownWords: str = ["python", "寿司", "テニス", "アサシン", "おぢさん"]
 words: str = []
 
-def splitText(msg):
+def split_text(msg):
     reactionState = False
 
     words = msg.split()

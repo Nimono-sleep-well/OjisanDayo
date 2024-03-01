@@ -3,6 +3,7 @@ import emoji
 import re
 import MeCab
 import random
+import json
 from nltk import ngrams
 from collections import Counter
 
@@ -13,6 +14,10 @@ def clean_text(lines):
     for line in lines:
         text = line
         text = re.sub(r"〇+", '@', text)
+        text = re.sub(r"MONTH", str(random.randrange(12)+1), text)
+        text = re.sub(r"DAYS", str(random.randrange(32)+1), text)
+        text = re.sub(r"HOURS", str(random.randrange(12)+1), text)
+        text = re.sub(r"MINUTES", str(random.randrange(60)), text)
         text = text.replace(" ", "")
         text = emoji.replace_emoji(text)
         cleaned_lines.append(text)
@@ -82,14 +87,16 @@ def make_sentence(model, topic, topic_list):
     return ''.join(sentence)
 
 # 以下使い方
-with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
- 	input = line.readlines()
 
-cleaned = clean_text(input)
-splitted = split_text(cleaned)
-model = make_model(splitted)
 
-# 知ってる単語list
-known_words = []
+def markov(word):
+    with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
+        input = line.readlines()
+    cleaned = clean_text(input)
+    splitted = split_text(cleaned)
+    model = make_model(splitted)
 
-print(make_sentence(model, '人間', known_words))
+    # 知ってる単語list(JSONを読み込む)
+    known_words = []
+
+    return make_sentence(model, word, known_words)

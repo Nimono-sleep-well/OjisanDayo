@@ -5,7 +5,8 @@ import json
 import random
 
 import config
-from function import (
+from function import(
+    markov,
     splitText
 )
 
@@ -27,13 +28,12 @@ async def on_message(message):
     if message.author.bot:
         return
     
-    #if message.content == "しずかに":
-    #    await message.channel.send("ごめんなさい")
-    #else:
-    #    await message.channel.send(msg)
-    
-    msg = splitText.splitText(message.content)
+    if message.content == "しずかに":
+        await message.channel.send("ごめんなさい")
+    else:
+        msg = markov.markov(message.content)
 
-    await message.channel.send(msg)
+        if random.randrange(1) == 0:
+            await message.channel.send(msg)    
 
 client.run(TOKEN)
