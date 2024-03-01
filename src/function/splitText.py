@@ -8,7 +8,6 @@ words: str = []
 splitted_text: str = []
 
 def split_text(msg):
-    reactionState = False
 
     tagger = MeCab.Tagger("-Ochasen")
 
