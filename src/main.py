@@ -31,7 +31,8 @@ async def on_message(message):
     if message.content == "しずかに":
         await message.channel.send("ごめんなさい")
     else:
-        msg = markov.markov(message.content)
+        words = splitText.split_text(message.content)
+        msg = markov.markov(words)
 
         if random.randrange(1) == 0:
             await message.channel.send(msg)    
