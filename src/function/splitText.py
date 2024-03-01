@@ -3,20 +3,18 @@ import MeCab
 
 reactionState: bool
 
-knownWords: str = ["python", "寿司", "テニス", "アサシン", "おぢさん"]
 words: str = []
+
+splitted_text: str = []
 
 def split_text(msg):
     reactionState = False
 
-    words = msg.split()
+    tagger = MeCab.Tagger("-Ochasen")
 
-    for i in knownWords:
-        if i in words:
-            reactionState = True
+    words = [line for line in tagger.parse(msg).splitlines() if "名詞" in line.split()[-1]]
 
-    #既知の語があれば確率で反応
-    if reactionState == True:
-        return "known"
-    else:
-        return "unknown"
+    for i in words:
+        splitted_text.append(i.split()[0])
+
+    return words
