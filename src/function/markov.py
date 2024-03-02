@@ -19,6 +19,8 @@ def clean_text(lines, emoji_del):
         text = re.sub(r"MINUTES", str(random.randrange(60)), text)
         text = text.replace(" ", "")
         text = text.replace("　", "")
+        text = text.replace("チャン","ちゃん")
+        text = text.replace("ﾁｬﾝ","ちゃん")
         if emoji_del:
             text = emoji.replace_emoji(text)
         cleaned_lines.append(text)
@@ -97,11 +99,12 @@ def make_model(datas):
 
 # 文章の作成 引数:model, 話題, 知ってる単語list
 def make_oji_sentence(model, topic, topic_list, emoji_dic):
+    
+    back_word = '_BEGIN_'
 
-    if topic not in topic_list:
-        back_word = '_BEGIN_'
-    else:
-        back_word = topic
+    for word in topic:
+        if word in topic_list:
+            back_word = word
 
     sentence = []
     sentence.append(back_word)
@@ -122,6 +125,9 @@ def make_oji_sentence(model, topic, topic_list, emoji_dic):
             decide_word = next_word + random.choice(emoji_dic[(back_word, next_word)])
         else:
             decide_word = next_word
+        
+        if next_word == 'ちゃん':
+            decide_word = decide_word.replace('ちゃん','チャン')
 
         back_word = next_word
         sentence.append(decide_word)
@@ -133,7 +139,7 @@ def make_oji_sentence(model, topic, topic_list, emoji_dic):
 
     return ''.join(sentence)
 
-def markov(word):
+def markov(words):
     with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
         input = line.readlines()
 
@@ -143,8 +149,8 @@ def markov(word):
     model = make_model(splitted)
 
     # 知ってる単語list(JSONを読み込む)
-    known_words = []
+    known_words = json.load(open('.\..\docs\words.json', 'r', encoding='utf-8'))["known_words"]
 
-    sentence = make_oji_sentence(model, word, known_words, emoji_dic)
+    sentence = make_oji_sentence(model, words, known_words, emoji_dic)
     
     return sentence
