@@ -7,7 +7,7 @@ from nltk import ngrams
 from collections import Counter
 
 # 正規表現化,絵文字の削除
-def clean_text(lines):
+def clean_text(lines, emoji_del):
     cleaned_lines = []
 
     for line in lines:
@@ -19,7 +19,8 @@ def clean_text(lines):
         text = re.sub(r"MINUTES", str(random.randrange(60)), text)
         text = text.replace(" ", "")
         text = text.replace("　", "")
-        text = emoji.replace_emoji(text)
+        if emoji_del:
+            text = emoji.replace_emoji(text)
         cleaned_lines.append(text)
     
     return cleaned_lines
@@ -32,35 +33,42 @@ def split_text(input):
 		datas.append(data)
 	return datas
 
-def make_emoji_list(input):
-    include_emoji = split_text(input)
+# emoji_dicの生成
+def make_emoji_dic(input):
     
-    words = []
-    for line in include_emoji:
-        words.append(line.split())
-    words = sum(words, [])
-    try:
-        words.remove(' ')
-    except ValueError:
-        pass
-
-    datas = []
-    last_word = ""
+    datas = split_text(clean_text(input, emoji_del=False))
+    datas = [f'_BEGIN_ {data} _END_' for data in datas]
+    datas = [data.split() for data in datas]
+    
+    # 並んだemojiの統合
     emoji_group = ""
-    for word in words:
-        if emoji.emoji_count(word) > 0:
-            emoji_group += word
-        else:
-            if emoji.emoji_count(emoji_group) > 0:
-                datas.append([last_word,emoji_group])
-            last_word = word
-            emoji_group = ""
+    line = []
+    lines = []
+    for data in datas:
+        for word in data:
+            if emoji.emoji_count(word) > 0:
+                emoji_group += word
+            else:
+                if emoji.emoji_count(emoji_group) > 0:
+                    line.append(emoji_group)
+                line.append(word)
+                emoji_group = ""
+        lines.append(line)
+        line = []
+        
+
+    words = []
+    for data in datas:
+        words.extend(list(ngrams(data,3)))
 
     emoji_dic = {}
-    for data in datas:
-        if data[0] not in emoji_dic:
-            emoji_dic[data[0]] = []
-        emoji_dic[data[0]].append(data[1])
+    for three_words in words:
+        two_words = three_words[:2]
+        next_words = three_words[2]
+        if (emoji.emoji_count(next_words) > 0) and (two_words not in emoji_dic):
+            emoji_dic[two_words] = []
+        if emoji.emoji_count(next_words) > 0:
+            emoji_dic[two_words].append(next_words)
 
     return emoji_dic
 
@@ -88,18 +96,19 @@ def make_model(datas):
     return dic
 
 # 文章の作成 引数:model, 話題, 知ってる単語list
-def make_sentence(model, topic, topic_list):
+def make_oji_sentence(model, topic, topic_list, emoji_dic):
 
     if topic not in topic_list:
-        begin = '_BEGIN_'
+        back_word = '_BEGIN_'
     else:
-        begin = topic
+        back_word = topic
 
     sentence = []
-    sentence.append(begin)
+    sentence.append(back_word)
+
+    decide_word = ""
 
     while True:
-        back_word = sentence[-1]
 
         words = model[back_word]['words']
         weights = model[back_word]['weights']
@@ -108,8 +117,14 @@ def make_sentence(model, topic, topic_list):
 
         if next_word == '_END_':
             break
-    
-        sentence.append(next_word)
+
+        if (back_word, next_word) in emoji_dic.keys():
+            decide_word = next_word + random.choice(emoji_dic[(back_word, next_word)])
+        else:
+            decide_word = next_word
+
+        back_word = next_word
+        sentence.append(decide_word)
 
     try:
         sentence.remove('_BEGIN_')
@@ -121,14 +136,15 @@ def make_sentence(model, topic, topic_list):
 def markov(word):
     with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
         input = line.readlines()
-    cleaned = clean_text(input)
+
+    emoji_dic = make_emoji_dic(input)
+    cleaned = clean_text(input, emoji_del=True)
     splitted = split_text(cleaned)
     model = make_model(splitted)
 
     # 知ってる単語list(JSONを読み込む)
     known_words = []
 
-    return make_sentence(model, word, known_words)
-
-with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
-    input = line.readlines()
+    sentence = make_oji_sentence(model, word, known_words, emoji_dic)
+    
+    return sentence
