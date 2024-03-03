@@ -14,6 +14,7 @@ TOKEN = config.BOT_TOKEN
 
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
+guild = discord.guild
 tree = app_commands.CommandTree(client)
 
 reaction_state: bool
@@ -55,8 +56,8 @@ async def on_message(message):
                 reaction_state = True
                 scolding_sentence = f'なんで{i}🤬なんて言うのカナ😡😡😡！？！？オヂサン、悲しいナ😥😥😥😥'
 
-        with open(info_path, 'r') as f:
-            oji_level = json.load(f)["ojiPower"]
+        oji_level = info_dict["ojiPower"]
+        ng_list = info_dict["dontTalkChannel"]
 
         rand = random.randrange(100)
         print(rand)
@@ -64,7 +65,7 @@ async def on_message(message):
         if reaction_state:
                 await message.author.send(scolding_sentence)
 
-        if rand < oji_level:
+        if (rand < oji_level) and (not(message.channel.id in ng_list)):
             await message.channel.send(msg)
 
 @tree.command(name="ojipower", description="change ojisan's power")
@@ -78,4 +79,24 @@ async def change_reaction_probability(interaction: discord.Interaction, level: i
     else:
         await interaction.response.send_message("0~100の数値にしてください", ephemeral=True)
 
+@tree.command(name="register", description="add channel that ojisan cannot talk")
+async def register_channel(interaction: discord.Interaction):
+
+    if not(interaction.channel_id in info_dict["dontTalkChannel"]):
+        info_dict["dontTalkChannel"].append(interaction.channel_id)
+        with open(info_path, 'w') as f:
+            json.dump(info_dict, f, indent=4)
+        await interaction.response.send_message(f'チャンネルID:{interaction.channel_id}では話せなくなりました', ephemeral=True)
+    else:
+        await interaction.response.send_message("このIDは既に登録されています", ephemeral=True)
+
+@tree.command(name="delete", description="delete channel that ojisan cannot talk")
+async def delete_channel(interaction: discord.Interaction):
+    if interaction.channel_id in info_dict["dontTalkChannel"]:
+        info_dict["dontTalkChannel"].remove(interaction.channel_id)
+        with open(info_path, 'w') as f:
+            json.dump(info_dict, f, indent=4)
+        await interaction.response.send_message(f'チャンネルID:{interaction.channel_id}でおぢさんが話し始めます', ephemeral=True)
+    else:
+        await interaction.response.send_message("このチャンネルではすでにおぢさんは話せます", ephemeral=True)
 client.run(TOKEN)
