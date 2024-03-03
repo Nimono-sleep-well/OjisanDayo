@@ -18,6 +18,11 @@ tree = app_commands.CommandTree(client)
 
 reaction_state: bool
 
+info_path = ".\..\docs\info.json"
+
+with open(info_path, 'r') as f:
+    info_dict = json.load(f)
+
 @client.event
 async def on_ready():
     print("Ojisan Started.")
@@ -38,6 +43,7 @@ async def on_message(message):
     
     if message.content == "しずかに":
         await message.channel.send("ごめんなさい")
+
     else:
 
         words_in_message = splitText.split_text(message.content)
@@ -49,10 +55,27 @@ async def on_message(message):
                 reaction_state = True
                 scolding_sentence = f'なんで{i}🤬なんて言うのカナ😡😡😡！？！？オヂサン、悲しいナ😥😥😥😥'
 
-        if reaction_state:
-            await message.author.send(scolding_sentence)
+        with open(info_path, 'r') as f:
+            oji_level = json.load(f)["ojiPower"]
 
-        if random.randrange(1) == 0:
-            await message.channel.send(msg)    
+        rand = random.randrange(100)
+        print(rand)
+
+        if reaction_state:
+                await message.author.send(scolding_sentence)
+
+        if rand < oji_level:
+            await message.channel.send(msg)
+
+@tree.command(name="ojipower", description="change ojisan's power")
+async def change_reaction_probability(interaction: discord.Interaction, level: int):
+
+    if(level >= 0 and level <= 100):
+        info_dict["ojiPower"] = level
+        with open(info_path, 'w') as f:
+            json.dump(info_dict, f, indent=4)
+        await interaction.response.send_message(f'おぢパワーを{level}に変更しました', ephemeral=True)
+    else:
+        await interaction.response.send_message("0~100の数値にしてください", ephemeral=True)
 
 client.run(TOKEN)
