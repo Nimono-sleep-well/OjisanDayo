@@ -17,8 +17,6 @@ def clean_text(lines, emoji_del):
         text = re.sub(r"HOURS", str(random.randrange(12)+1), text)
         text = re.sub(r"MINUTES", str(random.randrange(60)), text)
         text = text.replace('、', '')
-        text = text.replace("チャン","ちゃん")
-        text = text.replace("ﾁｬﾝ","ちゃん")
         if emoji_del:
             text = emoji.replace_emoji(text)
         cleaned_lines.append(text)
@@ -124,9 +122,6 @@ def make_oji_sentence(model, topic, topic_list, emoji_dic):
             decide_word = next_word + random.choice(emoji_dic[(back_word, next_word)])
         else:
             decide_word = next_word
-        
-        if next_word == 'ちゃん':
-            decide_word = decide_word.replace('ちゃん','チャン')
 
         back_word = next_word
         sentence.append(decide_word)
