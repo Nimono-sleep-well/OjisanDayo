@@ -20,30 +20,37 @@ tree = app_commands.CommandTree(client)
 reaction_state: bool
 
 info_path = ".\..\docs\info.json"
+words_path = ".\..\docs\words.json"
 
 with open(info_path, 'r') as f:
     info_dict = json.load(f)
 
+
 @client.event
 async def on_ready():
+
     print("Ojisan Started.")
 
     await tree.sync()
 
+
 @client.event
 async def on_message(message):
 
-    reaction_state = False
+    apologize_words: str = ["ごめんなさい", "はい"]
 
-    with open('.\..\docs\words.json', 'r', encoding='utf-8') as f:
+    reaction_state: bool = False
+
+    with open(words_path, 'r', encoding='utf-8') as f:
         json_words = json.load(f)
         hate_words = json_words["hate_words"]
 
     if message.author.bot:
         return
     
+    
     if message.content == "しずかに":
-        await message.channel.send("ごめんなさい")
+        await message.channel.send(apologize_words[random.randrange(2)])
 
     else:
 
@@ -54,19 +61,24 @@ async def on_message(message):
         for i in words_list_forDM:
             if i in hate_words:
                 reaction_state = True
-                scolding_sentence = f'なんで{i}🤬なんて言うのカナ😡😡😡！？！？オヂサン、悲しいナ😥😥😥😥'
-
+                rand = random.randrange(2)
+                if rand == 0:
+                    scolding_sentence = f'なんで{i}🤬なんて言うのカナ😡😡😡！？！？オヂサン、悲しいナ😥😥😥😥'
+                if rand == 1:
+                    scolding_sentence = f'ｷﾐ今{i}って言ったネ！？！？ｵﾁﾞｻﾝ、怒っちゃうﾖ😡！！'
+                
         oji_level = info_dict["ojiPower"]
         ng_list = info_dict["dontTalkChannel"]
 
         rand = random.randrange(100)
-        print(rand)
 
         if reaction_state:
+                await message.channel.send("ちょっとキミ、DMまで来なさい")
                 await message.author.send(scolding_sentence)
 
-        if (rand < oji_level) and (not(message.channel.id in ng_list)):
+        if not(reaction_state) and (rand < oji_level) and (not(message.channel.id in ng_list)):
             await message.channel.send(msg)
+
 
 @tree.command(name="ojipower", description="change ojisan's power")
 async def change_reaction_probability(interaction: discord.Interaction, level: int):
@@ -79,6 +91,7 @@ async def change_reaction_probability(interaction: discord.Interaction, level: i
     else:
         await interaction.response.send_message("0~100の数値にしてください", ephemeral=True)
 
+
 @tree.command(name="register", description="add channel that ojisan cannot talk")
 async def register_channel(interaction: discord.Interaction):
 
@@ -90,6 +103,7 @@ async def register_channel(interaction: discord.Interaction):
     else:
         await interaction.response.send_message("このIDは既に登録されています", ephemeral=True)
 
+
 @tree.command(name="delete", description="delete channel that ojisan cannot talk")
 async def delete_channel(interaction: discord.Interaction):
     if interaction.channel_id in info_dict["dontTalkChannel"]:
@@ -99,4 +113,6 @@ async def delete_channel(interaction: discord.Interaction):
         await interaction.response.send_message(f'チャンネルID:{interaction.channel_id}でおぢさんが話し始めます', ephemeral=True)
     else:
         await interaction.response.send_message("このチャンネルではすでにおぢさんは話せます", ephemeral=True)
+
+
 client.run(TOKEN)
