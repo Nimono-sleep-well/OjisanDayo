@@ -12,18 +12,17 @@ def clean_text(lines, emoji_del):
 
     for line in lines:
         text = line
-        text = re.sub(r"〇+", '@', text)
         text = re.sub(r"MONTH", str(random.randrange(12)+1), text)
         text = re.sub(r"DAYS", str(random.randrange(32)+1), text)
         text = re.sub(r"HOURS", str(random.randrange(12)+1), text)
         text = re.sub(r"MINUTES", str(random.randrange(60)), text)
-        text = text.replace(" ", "")
-        text = text.replace("　", "")
+        text = text.replace('、', '')
         text = text.replace("チャン","ちゃん")
         text = text.replace("ﾁｬﾝ","ちゃん")
         if emoji_del:
             text = emoji.replace_emoji(text)
         cleaned_lines.append(text)
+        print(text)
     
     return cleaned_lines
 
@@ -139,18 +138,19 @@ def make_oji_sentence(model, topic, topic_list, emoji_dic):
 
     return ''.join(sentence)
 
+with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
+    input = line.readlines()
+
+emoji_dic = make_emoji_dic(input)
+cleaned = clean_text(input, emoji_del=True)
+splitted = split_text(cleaned)
+model = make_model(splitted)
+
+# 知ってる単語list(JSONを読み込む)
+known_words = json.load(open('.\..\docs\words.json', 'r', encoding='utf-8'))["known_words"]
+
+
 def markov(words):
-    with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
-        input = line.readlines()
-
-    emoji_dic = make_emoji_dic(input)
-    cleaned = clean_text(input, emoji_del=True)
-    splitted = split_text(cleaned)
-    model = make_model(splitted)
-
-    # 知ってる単語list(JSONを読み込む)
-    known_words = json.load(open('.\..\docs\words.json', 'r', encoding='utf-8'))["known_words"]
-
     sentence = make_oji_sentence(model, words, known_words, emoji_dic)
     
     return sentence
