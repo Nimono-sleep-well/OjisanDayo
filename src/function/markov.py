@@ -144,7 +144,6 @@ model = make_model(splitted)
 # 知ってる単語list(JSONを読み込む)
 known_words = json.load(open('.\..\docs\words.json', 'r', encoding='utf-8'))["known_words"]
 
-
 def markov(words):
     sentence = make_oji_sentence(model, words, known_words, emoji_dic)
     
