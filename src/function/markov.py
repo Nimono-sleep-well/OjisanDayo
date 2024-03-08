@@ -9,18 +9,25 @@ from collections import Counter
 # 正規表現化,絵文字の削除
 def clean_text(lines, emoji_del):
     cleaned_lines = []
-
+    
+    # 一,二人称の正規表現化 既にYOUとMEに置き換わっているものは放置でよい
+    # 一人称
+    first_person = u'(お|オ|ｵ)(じ|ジ|ｼﾞ|ぢ|ヂ|ﾁﾞ)(さん|サン|ｻﾝ|ちゃん|チャン|ﾁｬﾝ)'
+    # 二人称 data.txtに文章を追加するときは名前を〇〇に置き換える(チャン等はあってもなくてもよい)
+    second_person = u'〇+(ちゃん|チャン|ﾁｬﾝ)?'
+    
     for line in lines:
         text = line
         text = re.sub(r"MONTH", str(random.randrange(12)+1), text)
         text = re.sub(r"DAYS", str(random.randrange(32)+1), text)
         text = re.sub(r"HOURS", str(random.randrange(12)+1), text)
         text = re.sub(r"MINUTES", str(random.randrange(60)), text)
+        text = re.sub(first_person, 'ME', text)
+        text = re.sub(second_person, 'YOU', text)
         text = text.replace('、', '')
         if emoji_del:
             text = emoji.replace_emoji(text)
         cleaned_lines.append(text)
-        print(text)
     
     return cleaned_lines
 
@@ -138,6 +145,7 @@ with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
 
 emoji_dic = make_emoji_dic(input)
 cleaned = clean_text(input, emoji_del=True)
+print(*cleaned, sep='\n')
 splitted = split_text(cleaned)
 model = make_model(splitted)
 
