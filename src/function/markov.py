@@ -25,6 +25,9 @@ def clean_text(lines, emoji_del):
         text = re.sub(first_person, 'ME', text)
         text = re.sub(second_person, 'YOU', text)
         text = text.replace('、', '')
+        text = text.replace('。', '')
+        text = text.replace(',', '')
+        text = text.replace('.', '')
         if emoji_del:
             text = emoji.replace_emoji(text)
         cleaned_lines.append(text)
@@ -145,7 +148,6 @@ with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
 
 emoji_dic = make_emoji_dic(input)
 cleaned = clean_text(input, emoji_del=True)
-print(*cleaned, sep='\n')
 splitted = split_text(cleaned)
 model = make_model(splitted)
 
