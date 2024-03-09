@@ -48,7 +48,7 @@ async def on_message(message):
     if message.author.bot:
         return
         
-    elif not(message.author.bot) and not(message.mentions) and len(message.content) >= 10:
+    elif not(message.author.bot) and not(message.mentions) and len(splitText.split_text_super(message.content)) >= 10:
         inputMessage.input_message(message.content)
 
     if message.content in QUIET_WORDS:
