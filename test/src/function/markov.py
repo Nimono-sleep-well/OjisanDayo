@@ -20,7 +20,6 @@ def clean_text(lines, emoji_del):
         if emoji_del:
             text = emoji.replace_emoji(text)
         cleaned_lines.append(text)
-        print(text)
     
     return cleaned_lines
 
