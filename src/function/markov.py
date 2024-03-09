@@ -18,10 +18,10 @@ def clean_text(lines, emoji_del):
     
     for line in lines:
         text = line
-        text = re.sub(r"MONTH", str(random.randrange(12)+1), text)
-        text = re.sub(r"DAYS", str(random.randrange(32)+1), text)
-        text = re.sub(r"HOURS", str(random.randrange(12)+1), text)
-        text = re.sub(r"MINUTES", str(random.randrange(60)), text)
+        # text = re.sub(r"MONTH", str(random.randrange(12)+1), text)
+        # text = re.sub(r"DAYS", str(random.randrange(32)+1), text)
+        # text = re.sub(r"HOURS", str(random.randrange(12)+1), text)
+        # text = re.sub(r"MINUTES", str(random.randrange(60)), text)
         text = re.sub(first_person, 'ME', text)
         text = re.sub(second_person, 'YOU', text)
         text = text.replace('、', '')
