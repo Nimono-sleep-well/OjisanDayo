@@ -7,7 +7,8 @@ import random
 import config
 from function import(
     markov,
-    splitText
+    splitText,
+    inputMessage
 )
 
 TOKEN = config.BOT_TOKEN
@@ -23,7 +24,7 @@ APOLOGIZE_WORDS: str = ("ごめんなさい", "はい")
 INFO_PATH = ".\..\docs\info.json"
 WORDS_PATH = ".\..\docs\words.json"
 
-with open(INFO_PATH, 'r') as f:
+with open(INFO_PATH, 'r', encoding='utf-8') as f:
     INFO_DICT = json.load(f)
 
 with open(WORDS_PATH, 'r', encoding='utf-8') as f:
@@ -46,6 +47,9 @@ async def on_message(message):
 
     if message.author.bot:
         return
+        
+    elif not(message.author.bot) and not(message.mentions) and len(message.content) >= 10:
+        inputMessage.input_message(message.content)
 
     if message.content in QUIET_WORDS:
         await message.channel.send(APOLOGIZE_WORDS[random.randrange(2)])

@@ -1,4 +1,5 @@
 {
     "ojiPower": 100,
-    "dontTalkChannel": []
+    "dontTalkChannel": [],
+    "message": []
 }
