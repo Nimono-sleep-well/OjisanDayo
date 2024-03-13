@@ -1,10 +1,15 @@
 import json
-import re
-
+from gensim.models import KeyedVectors
+"""
 from function import(
     markov,
     splitText
 )
+"""
+import markov
+import splitText
+
+wv = KeyedVectors.load_word2vec_format('./../docs/wiki_vec.pt', binary=True)
 
 def only_meishi(lines):
     splitted_lines = []
@@ -38,17 +43,55 @@ with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
 oji_cleaned = markov.clean_text(input, emoji_del=True)
 oji_splitted = only_meishi(oji_cleaned)
 oji_word_dic = make_word_dic(oji_splitted)
-oji_model = make_model(oji_cleaned, oji_splitted, oji_word_dic)
+oji_models = make_model(oji_cleaned, oji_splitted, oji_word_dic)
 
+def topic_max_similality(topics, oji_topics):
+    similalities = []
+    for oji_topic in oji_topics:
+        for topic in topics:
+            try:
+                sim = wv.similarity(topic, oji_topic)
+            except:
+                sim = 0
+            similalities.append(sim)
+
+    return max(similalities)
+
+def trance_topic(oji_text, oji_topic, msg_topic):
+    text = oji_text
+    for o in oji_topic:
+        for m in msg_topic:
+            try:
+                sim = wv.similarity(o, m)
+            except:
+                sim = 0
+            if 0.3 <= sim:
+                text = text.replace(o, m)
+
+    return text
+
+# 送られてきたメッセージをそのまま引数にぶち込む
 def make_sentence(message):
     msg_list = json.load(open('.\..\docs\info.json', 'r', encoding='utf-8'))["message"]
     msg_cleaned = markov.clean_text(msg_list, emoji_del=True)
     msg_splitted = only_meishi(msg_cleaned)
     msg_word_dic = make_word_dic(msg_splitted)
-    msg_model = make_model(msg_cleaned, msg_splitted, msg_word_dic)
 
     message_cleaned = markov.clean_text([message], emoji_del=True)
     message_splitted = splitText.split_text(message_cleaned[0])
     message_words = {k:v for k, v in msg_word_dic.items() if k in message_splitted}
     message_topics = [key for key in message_words.keys() if message_words[key] == min(message_words.values())]
-    print(message_topics)
+
+    max_similality = 0
+    max_topic = []
+    for model in oji_models:
+        similality = topic_max_similality(message_topics, model['topic'])
+        if max_similality < similality:
+            max_similality = similality
+            max_text = model['text']
+            max_topic = model['topic']
+
+    if 0.4 < max_similality:
+        return trance_topic(max_text, max_topic, message_topics)
+    else:
+        return "おぢさんの知らない話題だ..."
