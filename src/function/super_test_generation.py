@@ -1,13 +1,10 @@
 import json
 from gensim.models import KeyedVectors
-"""
+
 from function import(
     markov,
     splitText
 )
-"""
-import markov
-import splitText
 
 wv = KeyedVectors.load_word2vec_format('./../docs/wiki_vec.pt', binary=True)
 
