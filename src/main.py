@@ -49,7 +49,7 @@ async def on_message(message):
     if message.author.bot:
         return
         
-    elif not(message.author.bot) and not(message.mentions) and len(splitText.split_text(message.content)) >= 10:
+    elif not(message.author.bot) and not(message.mentions):
         inputMessage.input_message(message.content)
 
     if message.content in QUIET_WORDS:
@@ -59,9 +59,7 @@ async def on_message(message):
 
         words_in_message = splitText.split_text_to_noun(message.content)
         words_list_forDM = splitText.split_text(message.content)
-        msg = markov.markov(words_in_message)
-
-        super_test_generation.make_sentence(message.content)
+        msg = super_test_generation.make_sentence(message.content, "正岡子規")
 
         oji_level = INFO_DICT["ojiPower"]
         ng_list = INFO_DICT["dontTalkChannel"]

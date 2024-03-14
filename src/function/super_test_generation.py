@@ -1,4 +1,6 @@
 import json
+import re
+import random
 from gensim.models import KeyedVectors
 
 from function import(
@@ -37,7 +39,7 @@ def make_model(lines, splitted_lines, word_dic):
 
 with open('.\..\docs\data.txt', 'r', encoding='utf-8') as line:
     input = line.readlines()
-oji_cleaned = markov.clean_text(input, emoji_del=True)
+oji_cleaned = markov.clean_text(input, emoji_del=False)
 oji_splitted = only_meishi(oji_cleaned)
 oji_word_dic = make_word_dic(oji_splitted)
 oji_models = make_model(oji_cleaned, oji_splitted, oji_word_dic)
@@ -51,10 +53,10 @@ def topic_max_similality(topics, oji_topics):
             except:
                 sim = 0
             similalities.append(sim)
-
+    
     return max(similalities)
 
-def trance_topic(oji_text, oji_topic, msg_topic):
+def trance_topic(oji_text, oji_topic, msg_topic, user_name):
     text = oji_text
     for o in oji_topic:
         for m in msg_topic:
@@ -65,10 +67,17 @@ def trance_topic(oji_text, oji_topic, msg_topic):
             if 0.3 <= sim:
                 text = text.replace(o, m)
 
+    text = re.sub(r"YOU", "ｵﾁﾞｻﾝ", text)
+    text = re.sub(r"ME", user_name + 'ﾁｬﾝ', text)
+    text = re.sub(r"MONTH", str(random.randrange(12)+1), text)
+    text = re.sub(r"DAYS", str(random.randrange(32)+1), text)
+    text = re.sub(r"HOURS", str(random.randrange(12)+1), text)
+    text = re.sub(r"MINUTES", str(random.randrange(60)), text)
+
     return text
 
 # 送られてきたメッセージをそのまま引数にぶち込む
-def make_sentence(message):
+def make_sentence(message, user_name):
     msg_list = json.load(open('.\..\docs\info.json', 'r', encoding='utf-8'))["message"]
     msg_cleaned = markov.clean_text(msg_list, emoji_del=True)
     msg_splitted = only_meishi(msg_cleaned)
@@ -78,6 +87,8 @@ def make_sentence(message):
     message_splitted = splitText.split_text(message_cleaned[0])
     message_words = {k:v for k, v in msg_word_dic.items() if k in message_splitted}
     message_topics = [key for key in message_words.keys() if message_words[key] == min(message_words.values())]
+    if not message_topics:
+        return "おぢさんの知らない話題だ..."
 
     max_similality = 0
     max_topic = []
@@ -89,6 +100,6 @@ def make_sentence(message):
             max_topic = model['topic']
 
     if 0.4 < max_similality:
-        return trance_topic(max_text, max_topic, message_topics)
+        return trance_topic(max_text, max_topic, message_topics, user_name)
     else:
         return "おぢさんの知らない話題だ..."
