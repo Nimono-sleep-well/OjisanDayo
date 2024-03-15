@@ -59,7 +59,7 @@ async def on_message(message):
 
         words_in_message = splitText.split_text_to_noun(message.content)
         words_list_forDM = splitText.split_text(message.content)
-        msg = super_test_generation.make_sentence(message.content, "正岡子規")
+        msg = super_test_generation.make_sentence(message.content, message.author.mention)
 
         oji_level = INFO_DICT["ojiPower"]
         ng_list = INFO_DICT["dontTalkChannel"]
