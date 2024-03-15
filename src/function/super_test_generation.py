@@ -67,8 +67,8 @@ def trance_topic(oji_text, oji_topic, msg_topic, user_name):
             if 0.3 <= sim:
                 text = text.replace(o, m)
 
-    text = re.sub(r"YOU", "ｵﾁﾞｻﾝ", text)
-    text = re.sub(r"ME", user_name + 'ﾁｬﾝ', text)
+    text = re.sub(r"YOU", user_name + "ﾁｬﾝ", text)
+    text = re.sub(r"ME", "ｵﾁﾞｻﾝ", text)
     text = re.sub(r"MONTH", str(random.randrange(12)+1), text)
     text = re.sub(r"DAYS", str(random.randrange(32)+1), text)
     text = re.sub(r"HOURS", str(random.randrange(12)+1), text)
