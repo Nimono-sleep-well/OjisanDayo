@@ -8,6 +8,9 @@ from function import(
     splitText
 )
 
+word_tolerance = 0.25
+word_tolerance_trance = 0.2
+
 wv = KeyedVectors.load_word2vec_format('./../docs/wiki_vec.pt', binary=True)
 
 def only_meishi(lines):
@@ -64,7 +67,7 @@ def trance_topic(oji_text, oji_topic, msg_topic, user_name):
                 sim = wv.similarity(o, m)
             except:
                 sim = 0
-            if 0.3 <= sim:
+            if word_tolerance_trance <= sim:
                 text = text.replace(o, m)
 
     text = re.sub(r"YOU", "ｵﾁﾞｻﾝ", text)
@@ -99,7 +102,7 @@ def make_sentence(message, user_name):
             max_text = model['text']
             max_topic = model['topic']
 
-    if 0.4 < max_similality:
+    if word_tolerance < max_similality:
         return trance_topic(max_text, max_topic, message_topics, user_name)
     else:
         return "おぢさんの知らない話題だ..."
