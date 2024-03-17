@@ -79,7 +79,7 @@ async def on_message(message):
                 await message.channel.send("ちょっとキミ、DMまで来なさい")
                 await message.author.send(scolding_sentence)
 
-        if (not(reaction_state)) and (rand < oji_level) and (not(message.channel.id in ng_list)):
+        if (not(reaction_state)) and (rand < oji_level) and (message.channel.id in ng_list):
             await message.channel.send(msg)
 
 
